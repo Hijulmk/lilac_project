@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lilac_project/dashboard.dart';
+import 'package:lilac_project/screens/dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +20,7 @@ class _SplashScreen extends State<SplashScreen> {
         context,
         MaterialPageRoute(
           builder: (context) {
-            return const DashboardScreen();
+            return const DashboardScreen ();
           },
         ),
       );

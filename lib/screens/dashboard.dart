@@ -1,53 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:lilac_project/services/weather_services.dart';
+import 'package:lilac_project/screens/list_screen.dart';
+import 'package:lilac_project/services/weather.dart';
 
-import 'model/weather.dart';
+import '../model/weather.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
-// late final TextEditingController controller;
 
-class _MainPageState extends State<MainPage> {
-  WeatherService weatherService = WeatherService();
+class _DashboardScreenState extends State<DashboardScreen> {
   Weather weather = Weather();
   DateTime date = DateTime.now();
 
   String currentWeather = "";
-  String weatherIcons = "";
-  double tempC = 0;
-  double tempF = 0;
-  // double humidityR = 0;
 
-  late String dayName;
-  late String dateTdy;
+  String location = "location";
+
+  String temp = "0";
+
+  String humidity = "";
+
+  String wind = "";
+
+  String sealevel = "";
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    getWeather();
-  }
-
-  void getWeather() async {
-    weather = await weatherService.getWeatherData("chennai");
-    setState(() {
-      currentWeather = weather.condition;
-      weatherIcons = weather.weatherIcon;
-      tempF = weather.temperatureF;
-      tempC = weather.temperatureC;
-      // humidityR = weather.humidityR;
-      dayName = DateFormat('EEEE').format(date);
-      dateTdy = DateFormat('yMd').format(date);
+    WeatherData().fetch().then((value) async {
+      await WeatherData().saveData(value);
+      setState(() {
+        currentWeather = value.main!.feelsLike!.toString();
+        temp = value.main!.temp!.toString();
+        wind = 'speed:${value.wind!.speed}';
+        humidity = value.main!.humidity!.toString();
+        sealevel = value.main!.seaLevel!.toString();
+      });
     });
-    print(weather.temperatureC);
-    print(weather.temperatureF);
-    // print(weather.humidityR);
-    print(weather.condition);
   }
 
   @override
@@ -67,10 +59,15 @@ class _MainPageState extends State<MainPage> {
             children: [
               Container(
                 padding: const EdgeInsets.all(20),
-                child: const TextField(
-                  // controller: controller,
-                  // onChanged: widget.onTextChanged ?? (text) {},
-                  decoration: InputDecoration(
+                child: TextField(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ListScreen(),
+                        ));
+                  },
+                  decoration: const InputDecoration(
                     suffixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
                         borderSide: BorderSide(width: 05, color: Colors.grey),
@@ -79,70 +76,18 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               const Divider(),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      const Text(
-                        "Karachi",
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        dayName,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w300),
-                      )
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Container(
-                          height: 120.0,
-                          width: 120.0,
-                          decoration:  BoxDecoration(
-                              image: DecorationImage(
-                            image: AssetImage(
-                                weatherIcons),
-                            fit: BoxFit.fill,
-                          ))),
-                      Text(
-                        currentWeather,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w300),
-                      )
-                    ],
-                  )
-                ],
-              ),
-
-              // const Divider(),
-              // const SizedBox(
-              //   height: 50,
-              // ),
-
-              const Divider(),
-              const SizedBox(
-                height: 50,
-              ),
               Center(
                 child: Text(
-                  "$tempC °C",
+                  location,
                   style: const TextStyle(
                       fontSize: 25, fontWeight: FontWeight.w500),
                 ),
               ),
               Center(
                 child: Text(
-                  dateTdy,
+                  "$temp Temp",
                   style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w300),
+                      fontSize: 25, fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(
@@ -159,8 +104,7 @@ class _MainPageState extends State<MainPage> {
                             width: 50.0,
                             decoration: const BoxDecoration(
                                 image: DecorationImage(
-                              image: AssetImage(
-                                  "asset/images/wind.png"),
+                              image: AssetImage("asset/images/wind.png"),
                               fit: BoxFit.fill,
                             ))),
                         const Text(
@@ -168,10 +112,9 @@ class _MainPageState extends State<MainPage> {
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w300),
                         ),
-                        const Text(
-                          // humidityR.toString(),
-                          "reading",
-                          style: TextStyle(
+                        Text(
+                          wind,
+                          style: const TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w300),
                         ),
                       ],
@@ -184,8 +127,7 @@ class _MainPageState extends State<MainPage> {
                             width: 50.0,
                             decoration: const BoxDecoration(
                                 image: DecorationImage(
-                              image: AssetImage(
-                                  "asset/images/humidity.png"),
+                              image: AssetImage("asset/images/humidity.png"),
                               fit: BoxFit.fill,
                             ))),
                         const Text(
@@ -193,10 +135,9 @@ class _MainPageState extends State<MainPage> {
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w300),
                         ),
-                        const Text(
-                          // humidityR.toString(),
-                          "reading",
-                          style: TextStyle(
+                        Text(
+                          humidity,
+                          style: const TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w300),
                         ),
                       ],
@@ -209,17 +150,16 @@ class _MainPageState extends State<MainPage> {
                             width: 50.0,
                             decoration: const BoxDecoration(
                                 image: DecorationImage(
-                              image: AssetImage(
-                                  "asset/images/fahrenheit.png"),
+                              image: AssetImage("asset/images/sealvl.png"),
                               fit: BoxFit.fill,
                             ))),
                         const Text(
-                          "Fahrenheit ",
+                          "Sea Level ",
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w300),
                         ),
                         Text(
-                          tempF.toString(),
+                          sealevel,
                           style: const TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w300),
                         ),
@@ -227,7 +167,10 @@ class _MainPageState extends State<MainPage> {
                     )
                   ],
                 ),
-              )
+              ),
+              const SizedBox(
+                height: 50,
+              ),
             ],
           ),
         ),
